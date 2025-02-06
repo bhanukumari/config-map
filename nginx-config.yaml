@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: default
+  labels:
+    app.kubernetes.io/name: nginx-config
+    app.kubernetes.io/instance: bp
+    app.kubernetes.io/version: "0.0.1"
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: buildpiper-0.0.1
+  annotations:
+    meta.helm.sh/release-name: bp
+    meta.helm.sh/release-namespace: default
+data:
+  nginx.conf: |
+    user  root;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        include       /etc/nginx/mime.types;
+        default_type text/html;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+        error_log  /var/log/nginx/error.log  warn;
+        gzip  on;
+
+        include /etc/nginx/conf.d/*.conf;
+    }
